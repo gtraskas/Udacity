@@ -1,0 +1,88 @@
+
+# A story of games...
+by George Traskas
+* First story
+
+    https://public.tableau.com/profile/george.traskas#!/vizhome/game_sales/Story1
+    
+    
+* Second (revised) story
+
+    https://public.tableau.com/profile/george.traskas#!/vizhome/Videogamessalesfinal/Story1
+
+## Summary
+This visualization is about games sales and gaming trends. Dataset was downloaded from www.kaggle.com and contains a list of video games with sales greater than 100,000 copies. Exploring the sales through the years, a great decrease was revealed in 2008. Thus, data were further explored to see if the gaming trends have changed too.
+## Design - Feedback Changes
+* In the first story point, the history of gaming sales was examined, where a decrease was revealed in 2008. The worksheet contains worldwide data, as well as detailed regional market sales of Europe, North America, Japan and rest of the world for comparison reasons. Y-axis titles were changed to include units to be more clear (change after feedback). Dual y-axis was also synced to be more reliable and not trick the readers.
+* In the second page, a dashboard of two worksheets was created to show the comparison of worldwide and regional games sales granulated in "Genre" forms. A maximum function was also created to depict what games Japanese like to buy more. Additionally, a filter "After 2008" was added after the feedback recommendations to show what happened in gaming trends after the sales drop in 2008. Again, y-axis titles changed to include units and dashboard fit was set to automatic so that it sizes correctly to different screens.
+* Finally, a dashboard of 3 worksheets shows simultaneously the count of "Genre" and the top 10 games and consoles. A 4th graph shows the count of releases of each genre over time. All of these data (see feedback) react to the filters "Genre" and "After 2008". This time, x-axis was changed to include units. The intention of these graphs was to depict the changes in gaming especially after 2008. Bar/column charts were prefered over pies (in contrast to the feedback), since they make it easier for readers to compare values relative to each other. 
+* Top 10 filter was fixed. When Top N filter is applied to a view that uses a second filter, the updated view does not produce the expected Top N result. To fix this, the second filter must be added to context.
+* The core theme of the story was made more clear.
+
+## Feedback
+Feedback was received from Udacity Forums
+
+https://discussions.udacity.com/t/video-game-sales-feedback-wanted/380309/2
+
+1. m.r.heijboer
+
+    Hi George,
+
+    Interesting data. Did any good games or consoles come out in 2008? No idea.
+
+    See below some of the things that were not immediately clear to me. Good luck!
+
+    Rianne
+
+    –
+
+    First page:
+    The left axis shows the sales worldwide and the right axis the sales for the regions, right? Maybe you can make a bit clearer labels, like ‘Worldwide sales" and "Regional sales’ or something. And what does 600 represent? 600 games sold ( I guess not) or sales revenue and if so in which currency?
+
+    Second page:
+    What is the value on the y-axis? See previous comment.
+    Personally I would make these maybe pie charts, so it is easier to see how the popularity of the different type of games relate to each other for the different regions. But this is personal, I know some people hate pie charts :slight_smile: .
+
+    Third page:
+    I am not sure if this data is available, but it would be interesting to if the top games would react on changing the genre filter as well. Same comments on x-axis as before, what does 80 mean for Wii Sports?
+
+2. connermcb
+
+    Hi George,
+
+    I’d like to offer some feedback on your Tableau project.
+
+    First, regarding the formatting of the dashboards that make up the full story, be sure and set the fit to automatic so that it sizes correctly to different screens.
+
+    Second, the dashboards need a bit a tweaking, @m.r.heijboer made some good suggestions regarding that, but more importantly I’d say that the presentation is missing a core theme. The first slide starts off with a good questions that I assumed would guide the rest of the presentation. What happened to video game sales in 2008. From the first line graph we can see sales went down, but from there the story line diverges from that theme and from what I can tell doesn’t return to it. I think that analysis is there but it needs to be more centered around a central theme or finding that emerged from the data. What’s the conclusion the data led you to?
+
+    Good luck with the project and best wishes,
+
+    CM
+    
+## Resources
+* Top 10 fix
+    * Unexpected Results when using Top N Filter with Other Filter (http://kb.tableau.com/articles/issue/top-n-unexpected-results)
+    
+## Data Files
+* Link
+    * https://www.kaggle.com/gregorut/videogamesales
+    * Description
+        This dataset contains a list of video games with sales greater than 100,000 copies. It was generated by a scrape of vgchartz.com.
+
+        Fields include
+
+        * Rank - Ranking of overall sales
+        * Name - The games name
+        * Platform - Platform of the games release (i.e. PC,PS4, etc.)
+        * Year - Year of the game's release
+        * Genre - Genre of the game
+        * Publisher - Publisher of the game
+        * NA_Sales - Sales in North America (in millions)
+        * EU_Sales - Sales in Europe (in millions)
+        * JP_Sales - Sales in Japan (in millions)
+        * Other_Sales - Sales in the rest of the world (in millions)
+        * Global_Sales - Total worldwide sales.
+        
+        The script to scrape the data is available at https://github.com/GregorUT/vgchartzScrape. It is based on BeautifulSoup using Python. There are 16,598 records. 2 records were dropped due to incomplete information.
+

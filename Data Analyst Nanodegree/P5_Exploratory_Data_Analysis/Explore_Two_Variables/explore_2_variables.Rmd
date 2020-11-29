@@ -1,0 +1,490 @@
+---
+title: "Explore Two Variables"
+author: "George Traskas"
+date: "2017-06-06"
+output: html_document
+---
+
+***
+
+### Reading in Data
+
+```{r}
+library(ggplot2)
+pf <- read.csv("pseudo_facebook.tsv", sep = "\t")
+```
+
+### Scatterplots
+
+```{r Scatterplots}
+ggplot(aes(x = age, y = friend_count), data = pf) + 
+  geom_point()
+summary(pf$age)
+```
+
+***
+
+#### What are some things that you notice right away?
+* Younger users have a lot of friends
+* There are some vertical bars where people have lied about their age, like 69 and 100.
+
+***
+
+### Limit x
+
+```{r ggplot Syntax}
+ggplot(aes(x = age, y = friend_count), data = pf) + 
+  geom_point() + xlim(13, 90)
+```
+
+***
+
+### Overplotting
+Notes: The bulk of data lies below the 1000 threshold for friend count. Using "jitter", we can add some noise to each age so we get a clearer picture of the relationship between age and friend count (as age is a continuous variable)
+
+```{r Overplotting}
+ggplot(aes(x = age, y = friend_count), data = pf) + 
+  geom_jitter(alpha = 1/20) +
+  xlim(13, 90)
+```
+
+#### What do you notice in the plot?
+* The friend counts for young users aren't nearly as high as they looked before.
+
+***
+
+### Coord_trans()
+
+```{r Coord_trans()}
+ggplot(aes(x = age, y = friend_count), data = pf) + 
+  geom_point(alpha = 1/20) +
+  xlim(13, 90) +
+  coord_trans(y = "sqrt")
+```
+
+#### What do you notice?
+* It's much easier to see the distribution of friend count, conditional, and age.
+* We removed jitter, because if we add noise to people with 0 friends, we might end up with negative numbers and those sqrt would be imaginary.
+
+### Coord_trans() with jitter solution
+
+```{r}
+ggplot(aes(x = age, y = friend_count), data = pf) + 
+  geom_point(alpha = 1/20, position = position_jitter(h = 0)) +
+  xlim(13, 90) +
+  coord_trans(y = "sqrt")
+```
+
+***
+
+### Alpha and Jitter
+Explore the relationship between friends initiated vs age.
+
+```{r Alpha and Jitter}
+ggplot(data = pf, aes(x = age, y = friendships_initiated)) +
+  geom_point(alpha = 1/10, position = position_jitter(h = 0)) +
+  xlim(13, 90) +
+  coord_trans(y = "sqrt")
+```
+
+***
+
+### Conditional Means
+
+```{r Conditional Means}
+library(dplyr)
+age_groups <- group_by(pf, age)
+pf.fc_by_age <- summarise(age_groups, 
+          friend_count_mean = mean(friend_count), 
+          friend_count_median = median(friend_count),
+          n = n())
+pf.fc_by_age <- arrange(pf.fc_by_age, age)
+head(pf.fc_by_age)
+```
+
+Create your plot!
+
+```{r Conditional Means Plot}
+ggplot(data = pf.fc_by_age, aes(age, friend_count_mean)) +
+  geom_line()
+```
+
+***
+
+### Overlaying Summaries with Raw Data
+
+```{r Overlaying Summaries with Raw Data}
+ggplot(aes(x = age, y = friend_count), data = pf) +
+  coord_cartesian(xlim = c(13, 70), ylim = c(0, 1000)) +
+  geom_point(alpha = 0.05,
+             position = position_jitter(h = 0),
+             color = "orange") +
+  geom_line(stat = "summary", fun.y = mean) +
+  geom_line(stat = "summary", fun.y = quantile,
+            fun.args = list(probs = .1),
+            linetype = 2, color = "blue") +
+  geom_line(stat = "summary", fun.y = quantile,
+          fun.args = list(probs = .5),
+          color = "blue") +
+  geom_line(stat = "summary", fun.y = quantile,
+          fun.args = list(probs = .9),
+          linetype = 2, color = "blue")
+```
+
+#### What are some of your observations of the plot?
+* Having more than 1000 friends is quite rare
+* 35-60 years old friend count falls below 250
+
+***
+
+### Correlation
+
+```{r Correlation}
+cor.test(pf$age, pf$friend_count, method = "pearson")
+```
+
+What's the correlation between age and friend count? Round to three decimal places.
+
+* Correlation = -0.0274
+
+***
+
+### Correlation on Subsets
+
+```{r Correlation on Subsets}
+with(subset(pf, age <= 70), cor.test(age, friend_count))
+```
+
+***
+
+### Correlation Methods
+Pearson, Kendall, Spearman
+
+***
+
+## Create Scatterplots
+
+```{r}
+ggplot(data = pf, aes(www_likes_received, likes_received)) +
+  geom_point()
+```
+
+***
+
+### Strong Correlations
+
+```{r Strong Correlations}
+ggplot(data = pf, aes(www_likes_received, likes_received)) +
+  geom_point() +
+  xlim(0, quantile(pf$www_likes_received, 0.95)) +
+  ylim(0, quantile(pf$likes_received, 0.95)) +
+  geom_smooth(method = "lm", color = "red")
+```
+
+What's the correlation betwen the two variables? Include the top 5% of values for the variable in the calculation and round to 3 decimal places.
+
+```{r Correlation Calcuation}
+with(pf, cor.test(www_likes_received, likes_received))
+```
+
+* Correlation = 0.948
+* The correlation was actually an artifact of the nature of the variables as one of them is superset of the other.
+
+***
+
+### Moira on Correlation
+
+* Prefer independent variables to each other, so as to find the one which drives the phenomenon.
+* First measure the correlation between our variables and then determine which ones you don't actually want to throw in togeher ==> decide which to keep.
+
+***
+
+### More Caution with Correlation
+
+```{r More Caution With Correlation}
+# install.packages('alr3')
+library(alr3)
+data(Mitchell)
+?Mitchell
+head(Mitchell)
+```
+
+Create your plot!
+
+```{r Temp vs Month}
+ggplot(data = Mitchell, aes(x = Month, y = Temp)) +
+  geom_point()
+```
+
+***
+
+### Noisy Scatterplots
+a. Take a guess for the correlation coefficient for the scatterplot.
+
+* Correlation = 0.1
+
+b. What is the actual correlation of the two variables?
+
+* Correlation = 0.057
+
+```{r Noisy Scatterplots}
+with(Mitchell, cor.test(Month, Temp))
+```
+Seems like a pretty weak correlation.
+
+***
+
+### Making Sense of Data
+
+```{r Making Sense of Data}
+range(Mitchell$Month)
+ggplot(data = Mitchell, aes(x = Month, y = Temp)) +
+  geom_point() +
+  scale_x_continuous(breaks = seq(0, 203, 12))
+```
+
+***
+
+### A New Perspective
+
+What do you notice?
+
+* A cyclical pattern
+
+Watch the solution video and check out the Instructor Notes!
+
+* The cor and cor.test functions determine the strength of a linear relationship, but they may miss other relationships in the data.
+
+```{r}
+ggplot(aes(x=(Month%%12),y=Temp),data=Mitchell)+ 
+  geom_point()
+# install.packages("energy")
+library(energy)
+with(Mitchell, dcor.ttest(Month, Temp))
+```
+
+***
+
+### Understanding Noise: Age to Age Months
+
+```{r Understanding Noise: Age to Age Months}
+ggplot(data = pf.fc_by_age, aes(age, friend_count_mean)) +
+  geom_line()
+head(pf.fc_by_age, 10)
+pf.fc_by_age[17:19, ]
+pf$age_with_months <- pf$age + (1 - pf$dob_month / 12)
+# Alternative solution
+pf$age_with_months <- with(pf, age + (1 - dob_month / 12))
+```
+
+***
+
+### Age with Months Means
+
+```{r Age with Months Means}
+pf.fc_by_age_months <- pf %>% 
+  group_by(age_with_months) %>%
+  summarise(friend_count_mean = mean(friend_count), 
+          friend_count_median = median(friend_count),
+          n = n()) %>%
+  arrange(age_with_months)
+
+head(pf.fc_by_age_months)
+```
+
+***
+
+### Noise in Conditional Means
+
+```{r Noise in Conditional Means}
+ggplot(data = subset(pf.fc_by_age_months, age_with_months < 71),
+       aes(age_with_months, friend_count_mean)) +
+  geom_line()
+```
+
+***
+
+### Smoothing Conditional Means
+
+```{r Smoothing Conditional Means}
+p1 <- ggplot(aes(x = age, y = friend_count_mean),
+             data = subset(pf.fc_by_age, age < 71)) +
+  geom_line() +
+  geom_smooth()
+p2 <- ggplot(aes(x = age_with_months, y = friend_count_mean),
+             data = subset(pf.fc_by_age_months, age_with_months < 71)) +
+  geom_line() +
+  geom_smooth()
+p3 <- ggplot(aes(x = round(age / 5) * 5, y = friend_count),
+             data = subset(pf, age < 71)) +
+  geom_line(stat = "summary", fun.y = mean)
+
+library(gridExtra)
+grid.arrange(p1, p2, p3, ncol = 1)
+```
+
+***
+
+### Which Plot to Choose?
+You don't have to choose. In exploratory data analysis, we often create multiple visualisations and summaries of the same data. Each graph or summary may reveal different things about the same data.
+
+***
+
+### Analyzing Two Variables
+Reflection
+
+* Explore relationship between two varialbes.
+* Main visualising tool used was the scatterplot.
+* Augmented the scatterplot with conditional summaries.
+* Correlation - Benefits and limitations
+* How correlation may effect your decisions over which variables to include in your final models.
+* How to make sense of data through adjusting our visualisations.
+* How to use jitter and transparency to reduce over plotting.
+
+***
+
+### Load diamonds data set.
+
+```{r}
+data("diamonds")
+str(diamonds)
+```
+
+### Create a scatterplot of price vs x.
+
+```{r}
+ggplot(data = diamonds, aes(x = x, y = price)) +
+  geom_point()
+```
+
+* There are some outliers.
+* There is an exponential relationship between price and x.
+
+### Correlations
+
+```{r}
+with(diamonds, cor.test(price, x))
+with(diamonds, cor.test(price, y))
+with(diamonds, cor.test(price, z))
+```
+
+### Create a scatterplot of price vs depth.
+
+```{r}
+ggplot(data = diamonds, aes(x = x, y = depth)) +
+  geom_point()
+```
+
+### Make some adjustments - price vs. depth.
+
+```{r}
+range(diamonds$x)
+ggplot(data = diamonds, aes(x = x, y = depth)) +
+  geom_point(alpha = 1/100) +
+  scale_x_continuous(breaks=seq(0,11,2))
+```
+
+### Correlation between price and depth.
+
+```{r}
+with(diamonds, cor.test(price, depth))
+```
+
+* Based on this pretty weak correlation we cannot predict the price of a diamond using depth
+
+### Create a scatterplot of price vs carat and omit the top 1% of price and carat values.
+
+```{r}
+ggplot(data = subset(diamonds, diamonds$price < quantile(diamonds$price, 0.99) &
+                       diamonds$carat < quantile(diamonds$carat, 0.99)),
+       aes(x = price, y = carat)) +
+  geom_point(alpha = 1/20)
+```
+
+### Create a scatterplot of price vs. volume (x * y * z).
+
+```{r}
+diamonds$volume <- diamonds$x * diamonds$y * diamonds$z
+ggplot(data = diamonds, aes(x = price, y = volume)) +
+  geom_point()
+```
+
+* There are some outliers.
+* There is linear relationship between price and volume.
+
+```{r}
+library(plyr)
+count(diamonds$volume == 0)
+```
+
+### Correlation of price and volume.
+
+Exclude diamonds that have a volume greater than or equal to 800 and diamonds that have a volume of 0.
+
+```{r}
+with(subset(diamonds, !(volume == 0 | volume >= 800)), cor.test(price, volume))
+# Or
+with(subset(diamonds, volume > 0 & volume < 800), cor.test(price, volume))
+```
+
+### Adjustments - price vs. volume
+
+Subset the data to exclude diamonds with a volume greater than or equal to 800 and diamonds  with a volume of 0. Adjust the transparency of the points and add a linear model to the plot.
+
+```{r}
+diamonds_0_800 <- subset(diamonds, volume > 0 & volume < 800)
+ggplot(data = diamonds_0_800, aes(x = price, y = volume)) +
+  geom_point(alpha = 1/10, color = "yellow") +
+  geom_smooth(method = "lm", formula = y ~ x, size = 0.5) +
+  geom_smooth(method = "lm", formula = y ~ poly(x,2), size = 1, color = "green") +
+  geom_smooth(method = "lm", formula = y ~ poly(x,3), size = 1, color = "pink") +
+  geom_smooth(method = "gam", formula = y ~ s(x), size = 1, color = "violet") +
+  geom_smooth(method = "gam", formula = y ~ s(x, k = 3), size = .5, color = "red") +
+  coord_cartesian(ylim = c(0, 400))
+```
+
+Note: If you used the count() function from the plyr package before this exercise. You need to run this command to unload the plyr package.
+
+```{r}
+detach("package:plyr", unload=TRUE)
+```
+
+### Mean, median, min and max price by carity
+
+```{r}
+diamondsByClarity <- diamonds %>% 
+  group_by(clarity) %>%
+  summarise(mean_price = mean(price), 
+          median_price = median(price),
+          min_price = min(price),
+          max_price = max(price),
+          n = n()) %>%
+  arrange(clarity)
+
+head(diamondsByClarity)
+```
+
+### Mean price by color
+
+```{r}
+diamonds_by_color <- group_by(diamonds, color)
+diamonds_mp_by_color <- summarise(diamonds_by_color, mean_price = mean(price))
+```
+
+### Bar Charts of Mean Price
+Notes: There are two types of bar charts, determined by what is mapped to bar height. By default, geom_bar uses stat="count" which makes the height of the bar proportion to the number of cases in each group (or if the weight aesthetic is supplied, the sum of the weights). If you want the heights of the bars to represent values in the data, use stat="identity" and map a variable to the y aesthetic.
+
+```{r}
+p1 <- ggplot(aes(clarity, mean_price), data = diamondsByClarity) +
+geom_bar(stat = 'identity')
+p2 <- ggplot(aes(color, mean_price), data = diamonds_mp_by_color) +
+geom_bar(stat = 'identity')
+
+grid.arrange(p1, p2, ncol = 1)
+```
+
+### Trends in Mean Price
+
+* The trends seem to go against our intuition.
+* Mean price tends to decrease as clarity improves. The same can be said for color.
+
